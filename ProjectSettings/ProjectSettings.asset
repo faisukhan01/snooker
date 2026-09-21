@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 26
+  productGUID: 00000000000000000000000000000000
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  AndroidEnableSustainedPerformanceMode: 1
+  defaultScreenOrientation: 4
+  allowedAutorotateToPortrait: 0
+  allowedAutorotateToPortraitUpsideDown: 0
+  allowedAutorotateToLandscapeRight: 1
+  allowedAutorotateToLandscapeLeft: 1
+  useOSAutorotation: 1
+  use32BitDisplayBuffer: 1
+  preserveFramebufferAlpha: 0
+  disableDepthAndStencilBuffers: 0
+  defaultScreenWidth: 1920
+  defaultScreenHeight: 1080
+  defaultScreenWidthWeb: 960
+  defaultScreenHeightWeb: 600
+  defaultScreenDensity: 0
+  targetScreenDensity: 0
+  maximizeOnStartup: 0
+  resizesWindowWidth: 1280
+  resizesWindowHeight: 720
+  resizableWindow: 0
+  fullscreenMode: 3
+  aspectRatioMode: 1
+  asyncUploadTimeout: 2
+  lodBias: 1.4
+  maximumLODLevel: 0
+  enableFrameTimingStats: 0
+  useHDRDisplay: 0
+  companyName: faisukhan01
+  productName: Premium Mobile Snooker
+  companyLogo: {fileID: 0}
+  defaultWebScreenWidth: 1024
+  defaultWebScreenHeight: 768
+  runInBackground: 1
+  captureSingleScreen: 0
+  muteOtherAudioSources: 0
+  Prepare IOS For Recording: 0
+  Force IOS Speakers When Recording: 0
+  deferSystemGesturesMode: 0
+  disableDepthStencilSupport: 0
+  defaultInterfaceOrientation: 3
+  scriptingBackend:
+    Android: 1
+  il2cppCompilerConfiguration:
+    Android: 1
+  managedStrippingLevel: {}
+  incrementalIl2CppBuild: {}
+  allowUnsafeCode: 0
+  additionalIl2CppArgs: 
+  apiCompatibilityLevelPerPlatform: {}
+  colorSpace: 1
+  spriteBatchCacheSize: 4
+  activeColorSpace: 1
+  MTRendering: 1
+  mobileMTRendering:
+    Android: 1
+  mtRenderingBlacklistAndroid: []
+  graphicsJobs: 1
+  graphicsJobsOlderThan2018_2: 0
+  androidMinimumApiLevel: 23
+  androidTargetSdkVersion: 0
+  AndroidTargetArchitectures: 3
+  AndroidTargetDevices: 0
+  applicationIdentifier:
+    Android: com.faisukhan01.snooker
+  buildGPUAPIS: []
+  openGLRequireES31: 0
+  openGLRequireES31AEP: 0
+  vulkanNumSwapchainBuffers: 3
+  androidSymbolUploadType: 0
+  androidCreateSymbolsOnBuild: 1
+  androidPackageType: 1
+  stripEngineCode: 1
+  stripDebugCode: 1
+  preloadedAssets: []
+  metroInputSource: 0
+  m_HolographicPauseOnTrackingLoss: 1
+  xboxOneDisableKinectGpuReservation: 0
+  xboxOneEnable7thCore: 0
+  vrEditorSettings: {}
+  cloudProjectId: 
+  framebufferDepthMemorylessMode: 0
+  projectName: 
+  organizationId: 
+  cloudEnabled: 0
+  enableNativePlatformBackendsForNewInputSystem: 0
+  disableOldInputManagerSupport: 0
+  legacyClampBlendShapeWeights: 1
