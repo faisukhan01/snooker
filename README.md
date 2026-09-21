@@ -2,11 +2,29 @@
 
 A premium, realistic, fully playable mobile snooker game for Android built with **Unity 2022.3 LTS + C#**.
 
+[![Build Android APK](https://github.com/faisukhan01/snooker/actions/workflows/build-android.yml/badge.svg)](https://github.com/faisukhan01/snooker/actions/workflows/build-android.yml)
+
 Real PhysX table physics, a complete snooker rules engine, a 4-tier AI opponent, touch-first controls
 (drag-to-aim, power meter, spin pad), professional uGUI presentation, an honest performance/Game Tools
 panel, persistent profiles/statistics and a synthesized audio set — in one coherent, code-driven visual
 system. No TextMeshPro, no Input System package, no fabricated metrics: unavailable device values
 render as **N/A**.
+
+## Download the APK (CI builds)
+
+Every push to `main` builds the Android APK with GitHub Actions
+([workflow](.github/workflows/build-android.yml)) and publishes it as a GitHub Release.
+
+**Direct download link (latest successful build):**
+
+```
+https://github.com/faisukhan01/snooker/releases/latest/download/Snooker.apk
+```
+
+One-time setup: the CI needs a free Unity Personal license — see
+[GameCI activation](https://game.ci/docs/github/activation) or the instructions
+printed in the workflow run summary (`Actions` → `Build Android APK`).
+APKs are debug-signed and sideload-ready (Android 6.0 / API 23+).
 
 ## Highlights
 

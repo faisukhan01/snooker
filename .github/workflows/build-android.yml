@@ -1,0 +1,181 @@
+name: Build Android APK
+
+# Builds the Premium Mobile Snooker Android APK with game-ci.
+# - If the Unity license secrets are configured  -> full APK build + GitHub Release.
+# - If they are missing                          -> generates the Unity activation
+#   file (.alf) as an artifact and prints setup instructions in the run summary.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "Assets/**"
+      - "Packages/**"
+      - "ProjectSettings/**"
+      - ".github/workflows/build-android.yml"
+
+concurrency:
+  group: build-android
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  check-license:
+    name: Check Unity license secrets
+    runs-on: ubuntu-latest
+    outputs:
+      has_license: ${{ steps.check.outputs.has_license }}
+    steps:
+      - name: Check for Unity license secrets
+        id: check
+        env:
+          HAS_LICENSE: ${{ secrets.UNITY_LICENSE != '' || secrets.UNITY_SERIAL != '' }}
+        run: |
+          echo "has_license=$HAS_LICENSE" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_LICENSE" != "true" ]; then
+            echo "::warning::UNITY_LICENSE / UNITY_SERIAL secrets are not set yet - the first run will only generate a Unity activation file (.alf)."
+          fi
+
+  build-apk:
+    name: Build Android APK
+    needs: check-license
+    if: needs.check-license.outputs.has_license == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Free disk space (IL2CPP builds need room)
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc \
+            /usr/local/.ghcup /usr/local/share/boost /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af >/dev/null 2>&1 || true
+          echo "Free space after cleanup:"
+          df -h /
+
+      - name: Add extra swap (stabilise IL2CPP compilation)
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 8G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+          free -h
+
+      - name: Build Unity project (Android APK)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          targetPlatform: Android
+          unityVersion: auto
+          projectPath: .
+          buildName: Snooker
+          buildsPath: build
+          androidExportType: androidPlayerPackage
+          androidSymbolType: none
+
+      - name: List build output
+        run: ls -Rlh build/ || true
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Snooker-Android-APK
+          path: build/Android/*.apk
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Create GitHub Release with APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Snooker Android build v1.0.${{ github.run_number }}
+          body: |
+            Automatic Android build of **Premium Mobile Snooker** (Unity 2022.3 LTS).
+
+            - **File:** `Snooker.apk` — debug-signed, ready to sideload
+            - **Commit:** ${{ github.sha }}
+            - **Requirements:** Android 6.0 (API 23) or newer
+
+            **Install:** copy the APK to your phone, tap it, and allow
+            "Install from unknown sources" when prompted.
+          files: build/Android/*.apk
+          make_latest: true
+          fail_on_unmatched_files: true
+
+      - name: Print direct download link
+        run: |
+          echo "APK release published."
+          echo "Direct download: https://github.com/${{ github.repository }}/releases/latest/download/Snooker.apk"
+
+  license-help:
+    name: No Unity license yet - generate activation file + instructions
+    needs: check-license
+    if: needs.check-license.outputs.has_license == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Request Unity activation file (.alf)
+        id: alf
+        uses: game-ci/unity-request-activation-file@v2
+
+      - name: Upload activation file artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity_Activation_File
+          path: ${{ steps.alf.outputs.filePath }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Write setup instructions to run summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          # Unity license setup required (one-time, free)
+
+          This run did **not** build an APK because the repository has no Unity
+          license secrets yet. The pipeline is fully wired up otherwise - once
+          the secrets below exist, every run produces a downloadable APK and a
+          GitHub Release automatically.
+
+          ## Method A - Unity Hub (recommended, official GameCI flow)
+
+          1. Install [Unity Hub](https://unity.com/download) on your PC/Mac and log in.
+          2. Unity Hub > Preferences > Licenses > **Add** > **Get a free personal license**.
+             (Make sure you complete this step - a `.ulf` file must actually be created.)
+          3. Locate the license file:
+             - Windows: `C:\ProgramData\Unity\Unity_lic.ulf`
+             - macOS: `/Library/Application Support/Unity/Unity_lic.ulf`
+             - Linux: `~/.local/share/unity3d/Unity/Unity_lic.ulf`
+          4. Open this repository > **Settings** > **Secrets and variables** > **Actions** >
+             [New repository secret](https://github.com/faisukhan01/snooker/settings/secrets/actions) and add:
+             - `UNITY_LICENSE` = the full contents of the `.ulf` file
+             - `UNITY_EMAIL`  = your Unity account email
+             - `UNITY_PASSWORD` = your Unity account password
+
+          ## Method B - Activation file (no Unity Hub needed)
+
+          1. Download the **Unity_Activation_File** artifact from this run and unzip it.
+          2. Go to <https://license.unity3d.com/manual> and log in with your Unity ID.
+          3. Upload the `.alf` file, choose **Unity Personal Edition**, and download the `.ulf` file.
+          4. Add the three secrets listed in Method A.
+
+          ## Then
+
+          Re-run this workflow (**Actions** > **Build Android APK** > **Run workflow**).
+          Once it is green, the APK is available forever at:
+
+          ```
+          https://github.com/faisukhan01/snooker/releases/latest/download/Snooker.apk
+          ```
+          EOF
+          echo "Instructions written to the run summary."
